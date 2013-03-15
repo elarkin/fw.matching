@@ -1,12 +1,16 @@
-(ns fw.matching)
+(ns fw.matching
+  "Note: This implementation is not meant for production. It is an intellectual exercise to explore how `let` works"
+  (:refer-clojure :exclude [destructure]))
+
+;; TODO: The couple plays I use let should be using matching instead.
+;; This means that matching needs to be fully defined before its helpers.
 
 (declare destructure-single-binding)
 
 (defn- destructure-vector-element
   "Given the symbol for the vector value, the binding, and the index of the binding, return a vector of simple bindings"
   [value-sym binding-form index]
-  (let [value-expr `(nth ~value-sym ~index)]
-    (destructure-single-binding binding-form value-expr)))
+  (destructure-single-binding binding-form `(nth ~value-sym ~index)))
 
 (defn- destructure-vector
   "Destructures a vector"
@@ -29,7 +33,8 @@
   [map-binding value-expr]
   (let [value-sym (gensym "matching_map_")
         map-keys (keys map-binding)
-        bindings (map (partial destructure-map-element map-binding value-sym) map-keys)]
+        binding-from-map-key (partial destructure-map-element map-binding value-sym)
+        bindings (map binding-from-map-key map-keys)]
     (reduce concat [value-sym value-expr] bindings)))
 
 (defn- destructure-single-binding
@@ -44,15 +49,19 @@
 (defn- destructure
   "Takes a vector of name-sym value-expr pairs and returns a vector of simple bindings"
   [bindings]
+  (when (not (vector? bindings)) (throw (new IllegalArgumentException (str "Bindings must be a vector."))))
+  (when (odd? (count bindings)) (throw (new IllegalArgumentException (str "Must have an even number of bindings."))))
   (vec (apply concat (let [binding-pairs (partition 2 bindings)]
                        (map (partial apply destructure-single-binding)
                             binding-pairs)))))
 
 (defmacro matching
-  "Like let, but maps destructure as you see them, instead of in reverse:
+  "Like let, but maps destructure as literals, instead of in reverse:
 
   (matching [{:x x} {:x 1}]
             x) ;; returns 1
+
+As a result of the different map destructuring, advanced features of let may not be supported.
 "
   [bindings & body]
   `(let ~(destructure bindings)

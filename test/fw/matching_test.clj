@@ -26,4 +26,11 @@
         (matching [x 1
                    y 2]
                   (is (= x 1))
-                  (is (= y 2)))))))
+                  (is (= y 2)))))
+    (testing "error conditions"
+      (testing "unsupported destructuring form throws exception at macroexpansion time"
+        (is (thrown? Exception (macroexpand-1 '(matching [(list) 1])))))
+      (testing "uneven number of elements"
+        (is (thrown? IllegalArgumentException (macroexpand-1 '(matching [x])))))
+      (testing "not a vector for the bindings"
+        (is (thrown? IllegalArgumentException (macroexpand-1 '(matching (x 1)))))))))
