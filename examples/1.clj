@@ -1,4 +1,5 @@
-(use 'fw.matching)
+(ns fw.examples.example-1
+  (use [fw.matching :only [matching]]))
 
 ;; I've always found the way clojure.core/let does map destructuring to be a little confusing.
 
