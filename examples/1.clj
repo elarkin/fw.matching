@@ -1,5 +1,15 @@
 (use 'fw.matching)
 
+;; I've always found the way clojure.core/let does map destructuring to be a little confusing.
+
+;; I'm still learning Clojure, so I understand that there may be some hidden reason for it
+;; working the way it does.
+
+;; When I first heard that Clojure had map destructuring, I expected it to work by putting
+;; a map literal on the left hand side. Instead, you have to reverse the key and value positions.
+
+;; It gets even worse when you nest map inside map inside map. Perhaps I'm just a sadistic freak.
+
 (def shielded-character-map
   {:location [1 8]
    :equipment {:armor {:ac 8
